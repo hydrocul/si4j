@@ -15,12 +15,16 @@ rm -r META-INF
 rm compiler.properties
 popd >/dev/null
 
-pushd ./class/scala/tools/nsc/interpreter >/dev/null
+mkdir ./class/scala/tools/nsc/interpretex
+mkdir ./class/scala/tools/nsc/tmp
 {
-find . -exec echo 'echo create scala/tools/interpretex/{}' \; echo perl -p -e '/scala\\/tools\\/nsc\\/interpreter/scala\\/tools\\/nsc\\/interpretex/g' \< ./class/scala/tools/nsc/interpreter/{} \> ./class/scala/tools/nsc/interpretex/{} \;
-} > build1.tmp
+pushd ./class/scala/tools/nsc/interpreter >/dev/null
+find . -exec echo "echo 'create class/scala/tools/interpretex/{}'" \; \
+  -exec echo "perl -p -e 's/scala\\/tools\\/nsc\\/interpreter/scala\\/tools\\/nsc\\/interpretex/g' < './class/scala/tools/nsc/interpreter/{}' > './class/scala/tools/nsc/tmp/{}'" \; \
+  -exec echo "perl -p -e 's/scala\\\$tools\\\$nsc\\\$interpreter/scala\\\$tools\\\$nsc\\\$interpretex/g' < './class/scala/tools/nsc/tmp/{}' > './class/scala/tools/nsc/interpretex/{}'" \;
 popd >/dev/null
-
-#. build1.tmp
+} > build1.tmp
+. build1.tmp
+rm -r ./class/scala/tools/nsc/tmp
 
 fi
