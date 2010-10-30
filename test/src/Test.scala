@@ -6,7 +6,7 @@ object Test {
 
   def main(args: Array[String]){
 
-    println("scala-interpreter test start");
+    println("BEGIN OF scala-interpreter test");
 
     val classPath = System.getProperty("java.class.path");
     val settings = new scala.tools.nsc.Settings;
@@ -25,6 +25,8 @@ object Test {
       override def toString: String = pattern;
     }
 
+    var existsError: Boolean = false;
+
     def assert(expected: Any, result: Any): List[String] = {
       (expected, result) match {
         case (Some(ex), Some(re)) => assert(ex, re)
@@ -32,6 +34,7 @@ object Test {
         case (ex: StringPattern, re: Throwable) => assert(ex, re.getClass.getName)
         case (ex: Product, re: Product) => {
           if(ex.productArity != re.productArity){
+            existsError = true;
             ("expected: " + expected + ", but result: " + result) :: Nil
           } else {
             List((1 to ex.productArity):_*).flatMap(i =>
@@ -39,18 +42,20 @@ object Test {
           }
         }
         case (ex: StringPattern, re: String) => if(ex.matches(re)) Nil
-          else ("expected pattern: " + ex + ", but result: " + re) :: Nil
+          else { existsError = true;
+            ("expected pattern: " + ex + ", but result: " + re) :: Nil }
         case _ => if(expected==result) Nil
-          else ("expected: " + expected + ", but result: " + result) :: Nil
+          else { existsError = true;
+            ("expected: " + expected + ", but result: " + result) :: Nil }
       }
     }
 
     def testInterpreter(source: String,
       expectedResult: InterpreterResults.Result,
-      expectedMessage: String,
-      expectedValue: Option[ResultValueInfo],
+      expectedMessage: AnyRef,
+      expectedValue: Option[(AnyRef, Any, String)],
       expectedException: Option[String],
-      expectedAssignments: List[ResultValueInfo]): List[String] = {
+      expectedAssignments: List[(AnyRef, Any, String)]): List[String] = {
 
       val result: InterpreterSifjResult = interpreter.interpretSifj(source, false);
       val errors = assert(expectedResult, result.result) :::
@@ -68,16 +73,35 @@ object Test {
     }
 
     val msgs: List[String] =
+      testInterpreter("\"abc\"", InterpreterResults.Success,
+        StringPattern("res\\d+: java.lang.String = abc\n"),
+        Some((StringPattern("res\\d+"), "abc", "java.lang.String")), None,
+        (StringPattern("res\\d+"), "abc", "java.lang.String") :: Nil) :::
+      testInterpreter("1 + 2", InterpreterResults.Success,
+        StringPattern("res\\d+: Int = 3\n"),
+        Some((StringPattern("res\\d"), 3, "Int")), None,
+        (StringPattern("res\\+"), 3, "Int") :: Nil) :::
       testInterpreter("1 / 0", InterpreterResults.Error,
         "", None, Some("java.lang.ArithmeticException"),
         Nil) :::
-      testInterpreter("1 + 2", InterpreterResults.Success,
-        "res1: Int = 3\n", Some(ResultValueInfo("res1", 3, "Int")), None,
-        ResultValueInfo("res1", 3, "Int") :: Nil) ::: Nil;
+      testInterpreter("(1", InterpreterResults.Incomplete,
+        "", None, None,
+        Nil) :::
+      testInterpreter("(1 +", InterpreterResults.Incomplete,
+        "", None, None,
+        Nil) :::
+      testInterpreter("1 +", InterpreterResults.Incomplete,
+        "", None, None,
+        Nil) ::: Nil;
 
     msgs.foreach(println(_));
 
-    println("scala-interpreter test end");
+    println("END OF scala-interpreter test");
+
+    if(existsError){
+      println("ERROR exists");
+      System.exit(1);
+    }
 
   }
 
