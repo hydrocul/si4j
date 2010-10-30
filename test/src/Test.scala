@@ -74,11 +74,11 @@ object Test {
 
     val msgs: List[String] =
       testInterpreter("\"abc\"", InterpreterResults.Success,
-        StringPattern("res\\d+: java.lang.String = abc\n"),
+        StringPattern("res\\d+: java.lang.String = abc"),
         Some((StringPattern("res\\d+"), "abc", "java.lang.String")), None,
         (StringPattern("res\\d+"), "abc", "java.lang.String") :: Nil) :::
       testInterpreter("1 + 2", InterpreterResults.Success,
-        StringPattern("res\\d+: Int = 3\n"),
+        StringPattern("res\\d+: Int = 3"),
         Some((StringPattern("res\\d"), 3, "Int")), None,
         (StringPattern("res\\+"), 3, "Int") :: Nil) :::
       testInterpreter("1 / 0", InterpreterResults.Error,

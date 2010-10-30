@@ -689,7 +689,8 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     def generatesValue: Option[Name] = None
 
     def extraCodeToEvaluate(req: Request, code: PrintWriter) { }
-    def resultExtractionCode(req: Request, code: PrintWriter) { }
+    def resultExtractionCode(req: Request, code: PrintWriter) { resultExtractionCodeSifj(req, code); } // TODO Sifj
+    def resultExtractionCodeSifj(req: Request, code: PrintWriter) { }
 
     override def toString = "%s(used = %s)".format(this.getClass.toString split '.' last, usedNames)
   }
@@ -871,7 +872,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
         case Some(vname) if typeOf contains vname =>
           """
           |lazy val scala_repl_value = {
-          |  scala_repl_result
+          |  scala_repl_result.message
           |  %s
           |}""".stripMargin.format(fullPath(vname))
         case _  => ""
@@ -882,9 +883,9 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
       val preamble = """
       |object %s {
       |  %s
-      |  val scala_repl_result: String = {
+      |  val scala_repl_result: InterpreterSifjResult = {
       |    %s
-      |    (""
+      |    (InterpreterSifjResult(IR.Success, "", None, None, Nil)
       """.stripMargin.format(resultObjectName, valueExtractor, objectName + accessPath)
       
       val postamble = """
@@ -894,7 +895,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
       """.stripMargin
 
       code println preamble
-      handlers foreach { _.resultExtractionCode(this, code) }
+      handlers foreach { _.resultExtractionCodeSifj(this, code) }
       code println postamble
     }
 
@@ -993,9 +994,8 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
       
       catching(onErr) {
         unwrapping(wrapperExceptions: _*) {
-          (InterpreterSifjResult(IR.Success,
-            resultValMethod.invoke(loadedResultObject).toString,
-            None, None, Nil), true) // TODO Sifj
+          (resultValMethod.invoke(loadedResultObject).asInstanceOf[InterpreterSifjResult],
+            true)
         }
       }
     }
