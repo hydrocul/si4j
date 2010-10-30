@@ -88,7 +88,7 @@ class InterpreterLoop(in0: Option[BufferedReader], protected val out: PrintWrite
   protected val originalClassLoader = Thread.currentThread.getContextClassLoader
   
   var settings: Settings = _          // set by main()
-  var interpreter: InterpreterSifj = _    // set by createInterpreter()
+  var interpreter: Interpreter = _    // set by createInterpreter()
     
   // classpath entries added via :cp
   var addedClasspath: String = ""
