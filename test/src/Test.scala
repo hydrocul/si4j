@@ -1,5 +1,6 @@
-//import scala.tools.nsc.InterpreterExtResults;
-//import scala.tools.nsc.InterpreterResults;
+import scala.tools.nsc.InterpreterSifjResult;
+import scala.tools.nsc.InterpreterResults;
+import scala.tools.nsc.ResultValueInfo;
 
 object Test {
 
@@ -7,13 +8,12 @@ object Test {
 
     println("scala-interpreter test start");
 
-/*
     val classPath = System.getProperty("java.class.path");
     val settings = new scala.tools.nsc.Settings;
     settings.classpath.value = classPath;
     val sout = new java.io.StringWriter;
     def clearSout = { val s = sout.getBuffer; s.delete(0, s.length); }
-    val interpreter = new scala.tools.nsc.Interpreter(settings,
+    val interpreter = new scala.tools.nsc.InterpreterSifj(settings,
       new java.io.PrintWriter(sout));
 
     def assert(expected: AnyRef, result: AnyRef): List[String] = {
@@ -27,32 +27,31 @@ object Test {
     def testInterpreter(source: String,
       expectedResult: InterpreterResults.Result,
       expectedMessage: String,
-      expectedObject: (String, Any, String),
+      expectedValue: ResultValueInfo,
       expectedException: Option[Throwable],
-      expectedAssignments: List[(String, Any, String)]): List[String] = {
+      expectedAssignments: List[ResultValueInfo]): List[String] = {
 
-      val result: InterpreterExtResults = interpreter.interpret(source, false, None);
-      val errors = assert(expectedResult, result.interpreterResult) :::
-        assert(expectedMessage, result.resultMessages) :::
-        assert(expectedObject, result.resultObject) :::
+      val result: InterpreterSifjResult = interpreter.interpretSifj(source, false);
+      val errors = assert(expectedResult, result.result) :::
+        assert(expectedMessage, result.message) :::
+        assert(expectedValue, result.value) :::
         assert(expectedException, result.exception) :::
         assert(expectedAssignments, result.assignments) ::: Nil;
 
       if(errors.isEmpty){
         Nil
       } else {
-        errors.mkString("source: " + source + "\n\t", "\n\t", "") : Nil
+        errors.mkString("source: " + source + "\n\t", "\n\t", "") :: Nil
       }
 
     }
 
     val msgs =
       testInterpreter("1 + 2", InterpreterResults.Success,
-        "res0: Int = 3", ("res0", 3, "Int"), None,
-        ("res0", 3, "Int") :: Nil) :: Nil;
+        "res0: Int = 3", ResultValueInfo("res0", 3, "Int"), None,
+        ResultValueInfo("res0", 3, "Int") :: Nil) :: Nil;
 
     msgs.foreach(println(_));
-*/
 
     println("scala-interpreter test end");
 

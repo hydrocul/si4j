@@ -14,7 +14,7 @@ echo pushd $1 >/dev/null
 
 pushd $1/src >/dev/null
 find . -name "*.java" -exec echo mkjava $1 {} \;
-find . -name "*.scala" -exec echo mkscalasifj $1 {} \;
+find . -name "*.scala" -exec echo mkscala $1 {} \;
 popd >/dev/null
 
 echo popd >/dev/null
@@ -28,8 +28,8 @@ S=0
 mkjava()
 {
   if [ \$1/src/\$2 -nt \$1/touch/\$2.touch ] ; then
-    echo javac \$1/\$2    
-    javac -sourcepath \$1/src -d \$1/class \$1/src/\$2
+    echo javac -classpath ./class \$1/\$2    
+    javac -classpath ./class -sourcepath \$1/src -d \$1/class \$1/src/\$2
     if [ \$? -ne 0 ] ; then
     S=1
     else
@@ -41,21 +41,8 @@ mkjava()
 mkscala()
 {
   if [ \$1/src/\$2 -nt \$1/touch/\$2.touch ] ; then
-    echo scalac \$1/\$2    
-    fsc -sourcepath \$1/src -d \$1/class \$1/src/\$2
-    if [ \$? -ne 0 ] ; then
-    S=1
-    else
-    mkdir -p \`dirname \$1/touch/\$2.touch\`
-    touch \$1/touch/\$2.touch
-    fi
-  fi
-}
-mkscalasifj()
-{
-  if [ \$1/src/\$2 -nt \$1/touch/\$2.touch ] ; then
-    echo scalac \$1/\$2    
-    fsc -sourcepath \$1/src -d \$1/class \$1/src/\$2
+    echo scalac -classpath ./class \$1/\$2    
+    fsc -classpath ./class -sourcepath \$1/src -d \$1/class \$1/src/\$2
     if [ \$? -ne 0 ] ; then
     S=1
     else
@@ -75,7 +62,8 @@ exit 1
 fi
 
 # execute test
-scala -cp ./test/class:./class Test
+java -classpath ./test/class:./class:$SCALA_HOME/lib/* Test
+#scala -cp ./test/class:./class Test
 if [ \$? -ne 0 ] ; then
 exit 1
 fi
@@ -86,7 +74,7 @@ EOS
 
 } > build.tmp
 
-. build.tmp
+. build.tmp 2>&1
 
 rm build.tmp
 
