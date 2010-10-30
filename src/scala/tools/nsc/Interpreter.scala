@@ -30,7 +30,7 @@ import util.{ SourceFile, BatchSourceFile, ScriptSourceFile, ClassPath, Chars, s
 import scala.reflect.NameTransformer
 import scala.tools.nsc.{ InterpreterResults => IR }
 import interpreter._
-import Interpreter._
+import InterpreterSifj._
 
 /** <p>
  *    An interpreter for Scala code.
@@ -72,7 +72,7 @@ import Interpreter._
  * @author Moez A. Abdel-Gawad
  * @author Lex Spoon
  */
-class Interpreter(val settings: Settings, out: PrintWriter) {
+class InterpreterSifj(val settings: Settings, out: PrintWriter) {
   repl =>
   
   def println(x: Any) = {
@@ -185,7 +185,7 @@ class Interpreter(val settings: Settings, out: PrintWriter) {
   }
 
   /** interpreter settings */
-  lazy val isettings = new InterpreterSettings(this)
+  lazy val isettings = new InterpreterSettingsSifj(this)
 
   /** Instantiate a compiler.  Subclasses can override this to
    *  change the compiler class used by this interpreter. */
@@ -1028,7 +1028,7 @@ class Interpreter(val settings: Settings, out: PrintWriter) {
   
   def unleash(): Unit = beQuietDuring {
     interpret("import scala.tools.nsc._")
-    repl.bind("repl", "scala.tools.nsc.Interpreter", this)
+    repl.bind("repl", "scala.tools.nsc.InterpreterSifj", this)
     interpret("val global: repl.compiler.type = repl.compiler")
     interpret("val power: repl.power.type = repl.power")
     // interpret("val replVars = repl.replVars")
@@ -1220,7 +1220,7 @@ class Interpreter(val settings: Settings, out: PrintWriter) {
 }
 
 /** Utility methods for the Interpreter. */
-object Interpreter {
+object InterpreterSifj {
   
   import scala.collection.generic.CanBuildFrom
   def partialFlatMap[A, B, CC[X] <: Traversable[X]]
