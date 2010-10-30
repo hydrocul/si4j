@@ -15,3 +15,14 @@ case class InterpreterSifjResult (
       value, this.exception, this.assignments ::: assignments);
 
 }
+
+object InterpreterSifjResult {
+
+  def apply(result: InterpreterResults.Result): InterpreterSifjResult = {
+    if(result==InterpreterResults.Success){
+      throw new AssertionError;
+    }
+    InterpreterSifjResult(result, "", None, None, Nil);
+  }
+
+}

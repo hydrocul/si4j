@@ -72,7 +72,17 @@ import InterpreterSifj._
  * @author Moez A. Abdel-Gawad
  * @author Lex Spoon
  */
-class InterpreterSifj(val settings: Settings, out: PrintWriter) {
+trait Interpreter {
+
+  def beQuietDuring[T](operation: => T): T;
+
+  def interpret(line: String): IR.Result;
+
+  def bind(name: String, boundType: String, value: Any): IR.Result;
+
+}
+
+class InterpreterSifj(val settings: Settings, out: PrintWriter) extends Interpreter {
   repl =>
   
   def println(x: Any) = {
@@ -185,7 +195,7 @@ class InterpreterSifj(val settings: Settings, out: PrintWriter) {
   }
 
   /** interpreter settings */
-  lazy val isettings = new InterpreterSettingsSifj(this)
+  lazy val isettings = new InterpreterSettings(this)
 
   /** Instantiate a compiler.  Subclasses can override this to
    *  change the compiler class used by this interpreter. */
@@ -573,8 +583,10 @@ class InterpreterSifj(val settings: Settings, out: PrintWriter) {
    *  @return     ...
    */
   def interpret(line: String): IR.Result = interpret(line, false)
-  def interpret(line: String, synthetic: Boolean): IR.Result = {
-    def loadAndRunReq(req: Request) = {
+  def interpret(line: String, synthetic: Boolean): IR.Result =
+    interpretSifj(line, synthetic).result;
+  def interpretSifj(line: String, synthetic: Boolean): InterpreterSifjResult = {
+    def loadAndRunReq(req: Request): InterpreterSifjResult = {
       val (result, succeeded) = req.loadAndRun    
       if (printResults || !succeeded)
         out print clean(result)
@@ -583,17 +595,17 @@ class InterpreterSifj(val settings: Settings, out: PrintWriter) {
       if (succeeded && !synthetic)
         recordRequest(req)
       
-      if (succeeded) IR.Success
-      else IR.Error
+      if (succeeded) InterpreterSifjResult(IR.Success)
+      else InterpreterSifjResult(IR.Error)
     }
     
-    if (compiler == null) IR.Error
+    if (compiler == null) InterpreterSifjResult(IR.Error)
     else requestFromLine(line, synthetic) match {
-      case Left(result) => result
+      case Left(result) => InterpreterSifjResult(result)
       case Right(req)   => 
         // null indicates a disallowed statement type; otherwise compile and
         // fail if false (implying e.g. a type error)
-        if (req == null || !req.compile) IR.Error
+        if (req == null || !req.compile) InterpreterSifjResult(IR.Error)
         else loadAndRunReq(req)
     }
   }
