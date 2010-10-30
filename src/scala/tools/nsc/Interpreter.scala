@@ -72,7 +72,7 @@ import InterpreterSifj._
  * @author Moez A. Abdel-Gawad
  * @author Lex Spoon
  */
-trait Interpreter {
+abstract class Interpreter(val settings: Settings, out: PrintWriter){
 
   def beQuietDuring[T](operation: => T): T;
 
@@ -82,7 +82,7 @@ trait Interpreter {
 
 }
 
-class InterpreterSifj(val settings: Settings, out: PrintWriter) extends Interpreter {
+class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter(_settings, out){
   repl =>
   
   def println(x: Any) = {
