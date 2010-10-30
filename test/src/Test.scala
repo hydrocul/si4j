@@ -18,7 +18,7 @@ object Test {
 
     def assert(expected: AnyRef, result: AnyRef): List[String] = {
       if(result!=expected){
-        ("expedted: " + expected + ", but result: " + result) :: Nil
+        ("expected: " + expected + ", but result: " + result) :: Nil
       } else {
         Nil
       }
@@ -27,7 +27,7 @@ object Test {
     def testInterpreter(source: String,
       expectedResult: InterpreterResults.Result,
       expectedMessage: String,
-      expectedValue: ResultValueInfo,
+      expectedValue: Option[ResultValueInfo],
       expectedException: Option[Throwable],
       expectedAssignments: List[ResultValueInfo]): List[String] = {
 
@@ -46,10 +46,13 @@ object Test {
 
     }
 
-    val msgs =
+    val msgs: List[String] =
+      testInterpreter("1 / 0", InterpreterResults.Error,
+        "", None, None,
+        Nil) :::
       testInterpreter("1 + 2", InterpreterResults.Success,
-        "res0: Int = 3", ResultValueInfo("res0", 3, "Int"), None,
-        ResultValueInfo("res0", 3, "Int") :: Nil) :: Nil;
+        "res1: Int = 3\n", Some(ResultValueInfo("res0", 3, "Int")), None,
+        ResultValueInfo("res1", 3, "Int") :: Nil) ::: Nil;
 
     msgs.foreach(println(_));
 

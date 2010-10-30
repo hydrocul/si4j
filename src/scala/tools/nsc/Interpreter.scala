@@ -589,13 +589,13 @@ class InterpreterSifj(val settings: Settings, out: PrintWriter) extends Interpre
     def loadAndRunReq(req: Request): InterpreterSifjResult = {
       val (result, succeeded) = req.loadAndRun    
       if (printResults || !succeeded)
-        out print clean(result)
+        out print clean(result.message)
 
       // book-keeping
       if (succeeded && !synthetic)
         recordRequest(req)
       
-      if (succeeded) InterpreterSifjResult(IR.Success)
+      if (succeeded) result
       else InterpreterSifjResult(IR.Error)
     }
     
@@ -973,24 +973,29 @@ class InterpreterSifj(val settings: Settings, out: PrintWriter) extends Interpre
     }
 
     /** load and run the code using reflection */
-    def loadAndRun: (String, Boolean) = {
+    def loadAndRun: (InterpreterSifjResult, Boolean) = {
       val resultValMethod: reflect.Method = loadedResultObject getMethod "scala_repl_result"
       // XXX if wrapperExceptions isn't type-annotated we crash scalac
       val wrapperExceptions: List[Class[_ <: Throwable]] =
         List(classOf[InvocationTargetException], classOf[ExceptionInInitializerError])
       
       /** We turn off the binding to accomodate ticket #2817 */
-      def onErr: Catcher[(String, Boolean)] = {
+      def onErr: Catcher[(InterpreterSifjResult, Boolean)] = {
         case t: Throwable if bindLastException =>
           withoutBindingLastException {
             quietBind("lastException", "java.lang.Throwable", t)
-            (stringFromWriter(t.printStackTrace(_)), false)
+            (InterpreterSifjResult(IR.Error, stringFromWriter(t.printStackTrace(_)),
+              None, Some(t),
+              ResultValueInfo("lastException", t, "java.lang.Throwable") :: Nil),
+              false)
           }
       }
       
       catching(onErr) {
         unwrapping(wrapperExceptions: _*) {
-          (resultValMethod.invoke(loadedResultObject).toString, true)
+          (InterpreterSifjResult(IR.Success,
+            resultValMethod.invoke(loadedResultObject).toString,
+            None, None, Nil), true) // TODO Sifj
         }
       }
     }
