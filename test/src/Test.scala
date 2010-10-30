@@ -36,6 +36,10 @@ object Test {
           if(ex.productArity != re.productArity){
             existsError = true;
             ("expected: " + expected + ", but result: " + result) :: Nil
+          } else if(ex.productArity == 0){
+            if(expected==result) Nil
+            else { existsError = true;
+              ("expected: " + expected + ", but result: " + result) :: Nil }
           } else {
             List((1 to ex.productArity):_*).flatMap(i =>
               assert(ex.productElement(i), re.productElement(i)))

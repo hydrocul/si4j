@@ -689,7 +689,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     def generatesValue: Option[Name] = None
 
     def extraCodeToEvaluate(req: Request, code: PrintWriter) { }
-    def resultExtractionCode(req: Request, code: PrintWriter) { resultExtractionCodeSifj(req, code); } // TODO Sifj
+    def resultExtractionCode(req: Request, code: PrintWriter) { } // TODO Sifj
     def resultExtractionCodeSifj(req: Request, code: PrintWriter) { }
 
     override def toString = "%s(used = %s)".format(this.getClass.toString split '.' last, usedNames)
@@ -705,16 +705,21 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     override lazy val boundNames = List(vname)
     override def generatesValue = Some(vname)
     
-    override def resultExtractionCode(req: Request, code: PrintWriter) {
+    override def resultExtractionCodeSifj(req: Request, code: PrintWriter) {
       val isInternal = isGeneratedVarName(vname) && req.typeOfEnc(vname) == "Unit"
       if (!mods.isPublic || isInternal) return
       
-      lazy val extractor = "scala.runtime.ScalaRunTime.stringOf(%s)".format(req fullPath vname)
+      lazy val extractor = req fullPath vname
+      lazy val extractor2 = "scala.runtime.ScalaRunTime.stringOf(%s)".format(extractor)
       
       // if this is a lazy val we avoid evaluating it here
-      val resultString = if (isLazy) codegenln(false, "<lazy>") else extractor
-      val codeToPrint =
-        """ + "%s: %s = " + %s""".format(prettyName, string2code(req typeOf vname), resultString)
+      val resultString = if (isLazy) codegenln(false, "<lazy>") else extractor2
+      val codeToPrint = (
+        """. /* ValHandler */ append("%s: %s = " + %s, Some(%s), """ +
+        """ResultValueInfo("%s", %s, "%s"))""").
+        format(prettyName, string2code(req typeOf vname), resultString,
+        extractor,
+        prettyName, extractor, string2code(req typeOf vname))
       
       code print codeToPrint
     }
@@ -885,7 +890,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
       |  %s
       |  val scala_repl_result: InterpreterSifjResult = {
       |    %s
-      |    (InterpreterSifjResult(IR.Success, "", None, None, Nil)
+      |    (InterpreterSifjResult(IR.Success, "DEBUG", None, None, Nil)
       """.stripMargin.format(resultObjectName, valueExtractor, objectName + accessPath)
       
       val postamble = """
@@ -903,7 +908,12 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     lazy val objRun = compileAndSaveRun("<console>", objectSourceCode)
 
     // compile the result-extraction object
-    lazy val extractionObjectRun = compileAndSaveRun("<console>", resultObjectSourceCode)
+//    lazy val extractionObjectRun = compileAndSaveRun("<console>", resultObjectSourceCode)
+    lazy val extractionObjectRun = {
+      val s = resultObjectSourceCode;
+//      System.out.println(s);
+      compileAndSaveRun("<console>", s)
+    } // DEBUG Sifj
 
     lazy val loadedResultObject = loadByName(resultObjectName)
     
