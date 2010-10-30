@@ -14,7 +14,7 @@ echo pushd $1 >/dev/null
 
 pushd $1/src >/dev/null
 find . -name "*.java" -exec echo mkjava $1 {} \;
-find . -name "*.scala" -exec echo mkscala $1 {} \;
+find . -name "*.scala" -exec echo mkscalasifj $1 {} \;
 popd >/dev/null
 
 echo popd >/dev/null
@@ -39,6 +39,19 @@ mkjava()
   fi
 }
 mkscala()
+{
+  if [ \$1/src/\$2 -nt \$1/touch/\$2.touch ] ; then
+    echo scalac \$1/\$2    
+    fsc -sourcepath \$1/src -d \$1/class \$1/src/\$2
+    if [ \$? -ne 0 ] ; then
+    S=1
+    else
+    mkdir -p \`dirname \$1/touch/\$2.touch\`
+    touch \$1/touch/\$2.touch
+    fi
+  fi
+}
+mkscalasifj()
 {
   if [ \$1/src/\$2 -nt \$1/touch/\$2.touch ] ; then
     echo scalac \$1/\$2    
