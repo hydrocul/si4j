@@ -143,6 +143,27 @@ object Test {
         "defined module testObj", None, None,
         Nil) :::
       //
+      // test for ClassHandler
+      testInterpreter("abstract class testCls", InterpreterResults.Success,
+        "defined class testCls", None, None,
+        Nil) :::
+      testInterpreter("trait testTrait", InterpreterResults.Success,
+        "defined trait testTrait", None, None,
+        Nil) :::
+      //
+      // test for TypeHandler
+      testInterpreter("type JList = java.util.List", InterpreterResults.Error,
+        "", None, None,
+        Nil) :::
+      testInterpreter("type JSList = java.util.List[String]", InterpreterResults.Success,
+        "defined type alias JSList", None, None,
+        Nil) :::
+      //
+      // test for ImportHandler
+      testInterpreter("import java.util._", InterpreterResults.Error,
+        "import java.util._", None, None,
+        Nil) :::
+      //
       testInterpreter("var x = 5 % 3; var x = 3", InterpreterResults.Error,
         "", None, None,
         Nil) :::
@@ -151,6 +172,9 @@ object Test {
         Nil) :::
       testInterpreter("1 / 0", InterpreterResults.Error,
         "", None, Some("java.lang.ArithmeticException"),
+        Nil) :::
+      testInterpreter("throw new IllegalStateException", InterpreterResults.Error,
+        "", None, Some("java.lang.IllegalStateException"),
         Nil) :::
       testInterpreter("(1", InterpreterResults.Incomplete,
         "", None, None,
