@@ -69,9 +69,9 @@ object Test {
         assert(expectedAssignments, result.assignments) ::: Nil;
 
       if(errors.isEmpty){
-        "source: " + source + " -- OK" :: Nil
+        "OK -- source: " + source :: Nil
       } else {
-        errors.mkString("source: " + source + "\n\t", "\n\t", "") :: Nil
+        errors.mkString("FAILED source: " + source + "\n\t", "\n\t", "") :: Nil
       }
 
     }
@@ -93,6 +93,50 @@ object Test {
         "f: Int",
         None, None,
         Nil) :::
+      testInterpreter("def f(x: Int, y: Int) = x / y", InterpreterResults.Success,
+        "f: (x: Int,y: Int)Int",
+        None, None,
+        Nil) :::
+      testInterpreter("val f = 1 + 2\ndef g(x: Int) = x * 2", InterpreterResults.Success,
+        "f: Int = 3\ng: (x: Int)Int",
+        None, None,
+        ("f", 3, "Int") :: Nil) :::
+      testInterpreter("val f = 1 + 2\ndef g(x: Int) = ", InterpreterResults.Incomplete,
+        "", None, None,
+        Nil) :::
+      testInterpreter("var x = 5 % 3", InterpreterResults.Success,
+        "x: Int = 2",
+        Some(("x", 2, "Int")), None,
+        ("x", 2, "Int") :: Nil) :::
+      testInterpreter("var x = 5 % 3; x = 3", InterpreterResults.Success,
+        "x: Int = 3",
+        Some(("x", 3, "Int")), None,
+        ("x", 3, "Int") :: Nil) :::
+      //
+      // test for AssignmentHandler
+      testInterpreter("var x = 3", InterpreterResults.Success,
+        "x: Int = 3",
+        Some(("x", 3, "Int")), None,
+        ("x", 3, "Int") :: Nil) :::
+      testInterpreter("x = 4", InterpreterResults.Success,
+        "x: Int = 4",
+        Some(("x", 4, "Int")), None,
+        ("x", 4, "Int") :: Nil) :::
+      //
+      testInterpreter("val x = 5", InterpreterResults.Success,
+        "x: Int = 5",
+        Some(("x", 5, "Int")), None,
+        ("x", 5, "Int") :: Nil) :::
+      testInterpreter("x = 4", InterpreterResults.Error,
+        "", None, None,
+        Nil) :::
+      //
+      testInterpreter("var x = 5 % 3; var x = 3", InterpreterResults.Error,
+        "", None, None,
+        Nil) :::
+      testInterpreter("var x = 5 % 3; var x = 3", InterpreterResults.Error,
+        "", None, None,
+        Nil) :::
       testInterpreter("1 / 0", InterpreterResults.Error,
         "", None, Some("java.lang.ArithmeticException"),
         Nil) :::
@@ -102,7 +146,7 @@ object Test {
       testInterpreter("(1 +", InterpreterResults.Incomplete,
         "", None, None,
         Nil) :::
-      testInterpreter("1 +", InterpreterResults.Incomplete,
+      testInterpreter("1 +", InterpreterResults.Error,
         "", None, None,
         Nil) ::: Nil;
 

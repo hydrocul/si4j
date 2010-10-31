@@ -716,7 +716,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
       val resultString = if (isLazy) codegenln(false, "<lazy>") else extractor2
       val codeToPrint = (
         """.append("%s: %s = " + %s, Some(scala.tools.nsc.ResultValueInfo("%s", %s, "%s")), """ +
-        """scala.tools.nsc.ResultValueInfo("%s", %s, "%s") :: Nil) /* ValHandler */""").
+        """scala.tools.nsc.ResultValueInfo("%s", %s, "%s") :: Nil) /* ValHandler */""" + "\n").
         format(prettyName, string2code(req typeOf vname), resultString,
         prettyName, extractor, string2code(req typeOf vname),
         prettyName, extractor, string2code(req typeOf vname))
@@ -735,7 +735,8 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
 
     override def resultExtractionCodeSifj(req: Request, code: PrintWriter){
       if (mods.isPublic){
-        code print """.append("%s: %s")""".format(name, req.typeOf(name));
+        code print (""".append("%s: %s") /* DefHandler */""" + "\n").
+        format(name, req.typeOf(name));
       }
     }
   }
