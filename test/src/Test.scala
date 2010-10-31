@@ -171,11 +171,13 @@ object Test {
         "", None, None,
         Nil) :::
       testInterpreter("1 / 0", InterpreterResults.Error,
-        "", None, Some("java.lang.ArithmeticException"),
-        Nil) :::
+        StringPattern("(?s)java.lang.ArithmeticException: .*"),
+        None, Some("java.lang.ArithmeticException"),
+        ("lastException", "java.lang.ArithmeticException", "java.lang.Throwable") :: Nil) :::
       testInterpreter("throw new IllegalStateException", InterpreterResults.Error,
-        "", None, Some("java.lang.IllegalStateException"),
-        Nil) :::
+        StringPattern("(?s)java.lang.IllegalStateException.*"),
+        None, Some("java.lang.IllegalStateException"),
+        ("lastException", "java.lang.IllegalStateException", "java.lang.Throwable") :: Nil) :::
       testInterpreter("(1", InterpreterResults.Incomplete,
         "", None, None,
         Nil) :::

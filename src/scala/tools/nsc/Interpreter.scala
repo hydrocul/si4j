@@ -595,8 +595,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
       if (succeeded && !synthetic)
         recordRequest(req)
       
-      if (succeeded) result
-      else InterpreterSifjResult(IR.Error)
+      result
     }
     
     if (compiler == null) InterpreterSifjResult(IR.Error)
@@ -770,7 +769,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     override def generatesValue = Some(name)
 
     override def resultExtractionCodeSifj(req: Request, code: PrintWriter) =
-      code print (""".append("defined module %s")""" + "\n").format(string2code(name))
+      code print (""".append("defined module %s") /* ModuleHandler */""" + "\n").format(string2code(name))
   }
 
   private class ClassHandler(classdef: ClassDef) extends MemberHandler(classdef) {
@@ -779,7 +778,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
       name :: (if (mods hasFlag Flags.CASE) List(name.toTermName) else Nil)
     
     override def resultExtractionCodeSifj(req: Request, code: PrintWriter) =
-      code print (""".append("defined %s %s")""" + "\n").
+      code print (""".append("defined %s %s") /* ClassHandler */""" + "\n").
       format(string2code(classdef.keyword), string2code(name))
   }
 
@@ -789,7 +788,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     override lazy val boundNames = if (isAlias) List(name) else Nil
 
     override def resultExtractionCodeSifj(req: Request, code: PrintWriter) =
-      code print (""".append("defined type alias %s")""" + "\n").
+      code print (""".append("defined type alias %s") /* TypeAliasHandler */""" + "\n").
       format(string2code(name))
   }
 
@@ -822,7 +821,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
       selectorRenames filterNot (_ == USCOREkw) flatMap (x => List(x.toTypeName, x.toTermName))
     
     override def resultExtractionCodeSifj(req: Request, code: PrintWriter) =
-      code print (""".append("%s")""" + "\n").
+      code print (""".append("%s") /* ImportHandler */""" + "\n").
       format(string2code(imp.toString))
   }
 
@@ -921,13 +920,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     lazy val objRun = compileAndSaveRun("<console>", objectSourceCode)
 
     // compile the result-extraction object
-//    lazy val extractionObjectRun = compileAndSaveRun("<console>", resultObjectSourceCode)
-    lazy val extractionObjectRun = {
-      val s = resultObjectSourceCode;
-      System.out.println(s);
-//(new Throwable(s)).printStackTrace();
-      compileAndSaveRun("<console>", s)
-    } // DEBUG Sifj
+    lazy val extractionObjectRun = compileAndSaveRun("<console>", resultObjectSourceCode)
 
     lazy val loadedResultObject = loadByName(resultObjectName)
     
