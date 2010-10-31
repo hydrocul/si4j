@@ -2,4 +2,5 @@ class/
 touch/
 tmp/
 *.tmp
+*.jar
 
