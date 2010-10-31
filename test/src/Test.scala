@@ -153,9 +153,6 @@ object Test {
         "", None, None,
         Nil) ::: Nil;
 
-println(1+
-
-3);
     msgs.foreach(println(_));
 
     println("END OF scala-interpreter test");
