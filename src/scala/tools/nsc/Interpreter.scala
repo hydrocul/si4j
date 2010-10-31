@@ -689,7 +689,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     def generatesValue: Option[Name] = None
 
     def extraCodeToEvaluate(req: Request, code: PrintWriter) { }
-    def resultExtractionCode(req: Request, code: PrintWriter) { } // TODO Sifj
+    def resultExtractionCode(req: Request, code: PrintWriter) { }
     def resultExtractionCodeSifj(req: Request, code: PrintWriter) { }
 
     override def toString = "%s(used = %s)".format(this.getClass.toString split '.' last, usedNames)
