@@ -733,8 +733,11 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
       if (vparamss.isEmpty || vparamss.head.isEmpty) Some(name)
       else None
 
-    override def resultExtractionCode(req: Request, code: PrintWriter) =
-      if (mods.isPublic) code print codegenln(name, ": ", req.typeOf(name))
+    override def resultExtractionCodeSifj(req: Request, code: PrintWriter){
+      if (mods.isPublic){
+        code print """.append("%s: %s")""".format(name, req.typeOf(name));
+      }
+    }
   }
 
   private class AssignHandler(member: Assign) extends MemberHandler(member) {
@@ -912,7 +915,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
 //    lazy val extractionObjectRun = compileAndSaveRun("<console>", resultObjectSourceCode)
     lazy val extractionObjectRun = {
       val s = resultObjectSourceCode;
-//      System.out.println(s);
+      System.out.println(s);
 //(new Throwable(s)).printStackTrace();
       compileAndSaveRun("<console>", s)
     } // DEBUG Sifj

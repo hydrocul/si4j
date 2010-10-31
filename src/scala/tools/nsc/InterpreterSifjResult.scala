@@ -14,6 +14,12 @@ case class InterpreterSifjResult (
         else this.message + "\n" ) + message.trim,
       value, this.exception, this.assignments ::: assignments);
 
+  def append(message: String): InterpreterSifjResult =
+    InterpreterSifjResult(result,
+      ( if(this.message.isEmpty) ""
+        else this.message + "\n" ) + message.trim,
+      None, this.exception, this.assignments);
+
 }
 
 object InterpreterSifjResult {
