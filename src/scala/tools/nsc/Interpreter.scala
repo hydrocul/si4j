@@ -769,8 +769,8 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     override lazy val boundNames = List(name)
     override def generatesValue = Some(name)
 
-    override def resultExtractionCode(req: Request, code: PrintWriter) =
-      code println codegenln("defined module ", name)
+    override def resultExtractionCodeSifj(req: Request, code: PrintWriter) =
+      code println (""".append("defined module %s")""" + "\n").format(name)
   }
 
   private class ClassHandler(classdef: ClassDef) extends MemberHandler(classdef) {
