@@ -85,6 +85,14 @@ object Test {
         StringPattern("res\\d+: Int = 3"),
         Some((StringPattern("res\\d"), 3, "Int")), None,
         (StringPattern("res\\d+"), 3, "Int") :: Nil) :::
+      testInterpreter("val f = 1 + 2", InterpreterResults.Success,
+        "f: Int = 3",
+        Some(("f", 3, "Int")), None,
+        ("f", 3, "Int") :: Nil) :::
+      testInterpreter("def f = 1 + 2", InterpreterResults.Success,
+        "f: Int",
+        None, None,
+        Nil) :::
       testInterpreter("1 / 0", InterpreterResults.Error,
         "", None, Some("java.lang.ArithmeticException"),
         Nil) :::
