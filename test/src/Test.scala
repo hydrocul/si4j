@@ -41,7 +41,7 @@ object Test {
             else { existsError = true;
               ("expected: " + expected + ", but result: " + result) :: Nil }
           } else {
-            List((1 to ex.productArity):_*).flatMap(i =>
+            List((0 until ex.productArity):_*).flatMap(i =>
               assert(ex.productElement(i), re.productElement(i)))
           }
         }
@@ -84,7 +84,7 @@ object Test {
       testInterpreter("1 + 2", InterpreterResults.Success,
         StringPattern("res\\d+: Int = 3"),
         Some((StringPattern("res\\d"), 3, "Int")), None,
-        (StringPattern("res\\+"), 3, "Int") :: Nil) :::
+        (StringPattern("res\\d+"), 3, "Int") :: Nil) :::
       testInterpreter("1 / 0", InterpreterResults.Error,
         "", None, Some("java.lang.ArithmeticException"),
         Nil) :::

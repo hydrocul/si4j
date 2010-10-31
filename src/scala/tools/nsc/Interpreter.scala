@@ -715,10 +715,10 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
       // if this is a lazy val we avoid evaluating it here
       val resultString = if (isLazy) codegenln(false, "<lazy>") else extractor2
       val codeToPrint = (
-        """. /* ValHandler */ append("%s: %s = " + %s, Some(%s), """ +
-        """ResultValueInfo("%s", %s, "%s"))""").
+        """.append("%s: %s = " + %s, Some(scala.tools.nsc.ResultValueInfo("%s", %s, "%s")), """ +
+        """scala.tools.nsc.ResultValueInfo("%s", %s, "%s") :: Nil) /* ValHandler */""").
         format(prettyName, string2code(req typeOf vname), resultString,
-        extractor,
+        prettyName, extractor, string2code(req typeOf vname),
         prettyName, extractor, string2code(req typeOf vname))
       
       code print codeToPrint
@@ -888,9 +888,10 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
       val preamble = """
       |object %s {
       |  %s
-      |  val scala_repl_result: InterpreterSifjResult = {
+      |  val scala_repl_result: scala.tools.nsc.InterpreterSifjResult = {
       |    %s
-      |    (InterpreterSifjResult(IR.Success, "DEBUG", None, None, Nil)
+      |    (scala.tools.nsc.InterpreterSifjResult(scala.tools.nsc.
+      |      InterpreterResults.Success, "", None, None, Nil)
       """.stripMargin.format(resultObjectName, valueExtractor, objectName + accessPath)
       
       val postamble = """
@@ -912,6 +913,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     lazy val extractionObjectRun = {
       val s = resultObjectSourceCode;
 //      System.out.println(s);
+//(new Throwable(s)).printStackTrace();
       compileAndSaveRun("<console>", s)
     } // DEBUG Sifj
 
