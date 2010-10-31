@@ -32,6 +32,7 @@ object Test {
         case (Some(ex), Some(re)) => assert(ex, re)
         case (ex: String, re: Throwable) => assert(ex, re.getClass.getName)
         case (ex: StringPattern, re: Throwable) => assert(ex, re.getClass.getName)
+        case (ex1 :: ex2, re1 :: re2) => assert(ex1, re1) ::: assert(ex2, re2)
         case (ex: Product, re: Product) => {
           if(ex.productArity != re.productArity){
             existsError = true;
@@ -69,7 +70,7 @@ object Test {
         assert(expectedAssignments, result.assignments) ::: Nil;
 
       if(errors.isEmpty){
-        "OK -- source: " + source :: Nil
+        "OK --- source: " + source :: Nil
       } else {
         errors.mkString("FAILED source: " + source + "\n\t", "\n\t", "") :: Nil
       }
@@ -108,6 +109,8 @@ object Test {
         "x: Int = 2",
         Some(("x", 2, "Int")), None,
         ("x", 2, "Int") :: Nil) :::
+      //
+      // test for AssignmentHandler
       testInterpreter("var x = 5 % 3; x = 3", InterpreterResults.Success,
         "x: Int = 3",
         Some(("x", 3, "Int")), None,
@@ -134,7 +137,7 @@ object Test {
       testInterpreter("var x = 5 % 3; var x = 3", InterpreterResults.Error,
         "", None, None,
         Nil) :::
-      testInterpreter("var x = 5 % 3; var x = 3", InterpreterResults.Error,
+      testInterpreter("var x = 5 % 3; val x = 3", InterpreterResults.Error,
         "", None, None,
         Nil) :::
       testInterpreter("1 / 0", InterpreterResults.Error,
@@ -150,6 +153,9 @@ object Test {
         "", None, None,
         Nil) ::: Nil;
 
+println(1+
+
+3);
     msgs.foreach(println(_));
 
     println("END OF scala-interpreter test");

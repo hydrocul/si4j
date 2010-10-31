@@ -750,11 +750,16 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
       code println """val %s = %s""".format(helperName, lhs)
 
     /** Print out lhs instead of the generated varName */
-    override def resultExtractionCode(req: Request, code: PrintWriter) {
+    override def resultExtractionCodeSifj(req: Request, code: PrintWriter) {
       val lhsType = string2code(req typeOfEnc helperName)
       val res = string2code(req fullPath helperName)
-      val codeToPrint = """ + "%s: %s = " + %s + "\n" """.format(lhs, lhsType, res)
-          
+      val codeToPrint = (
+        """.append("%s: %s = " + %s, Some(scala.tools.nsc.ResultValueInfo("%s", %s, "%s")), """ +
+        """scala.tools.nsc.ResultValueInfo("%s", %s, "%s") :: Nil) /* AssignHandler */""" + "\n").
+        format(lhs, lhsType, res,
+        lhs, res, lhsType,
+        lhs, res, lhsType)
+
       code println codeToPrint
     }
   }
