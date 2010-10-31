@@ -760,7 +760,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
         string2code(lhs.toString), res, lhsType,
         string2code(lhs.toString), res, lhsType)
 
-      code println codeToPrint
+      code print codeToPrint
     }
   }
 
@@ -770,7 +770,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     override def generatesValue = Some(name)
 
     override def resultExtractionCodeSifj(req: Request, code: PrintWriter) =
-      code println (""".append("defined module %s")""" + "\n").format(string2code(name))
+      code print (""".append("defined module %s")""" + "\n").format(string2code(name))
   }
 
   private class ClassHandler(classdef: ClassDef) extends MemberHandler(classdef) {
@@ -778,8 +778,9 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     override lazy val boundNames = 
       name :: (if (mods hasFlag Flags.CASE) List(name.toTermName) else Nil)
     
-    override def resultExtractionCode(req: Request, code: PrintWriter) =
-      code print codegenln("defined %s %s".format(classdef.keyword, name))
+    override def resultExtractionCodeSifj(req: Request, code: PrintWriter) =
+      code print (""".append("defined %s %s")""" + "\n").
+      format(string2code(classdef.keyword), string2code(name))
   }
 
   private class TypeAliasHandler(typeDef: TypeDef) extends MemberHandler(typeDef) {
@@ -787,8 +788,9 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     def isAlias() = mods.isPublic && compiler.treeInfo.isAliasTypeDef(typeDef)
     override lazy val boundNames = if (isAlias) List(name) else Nil
 
-    override def resultExtractionCode(req: Request, code: PrintWriter) =
-      code println codegenln("defined type alias ", name)
+    override def resultExtractionCodeSifj(req: Request, code: PrintWriter) =
+      code print (""".append("defined type alias %s")""" + "\n").
+      format(string2code(name))
   }
 
   private class ImportHandler(imp: Import) extends MemberHandler(imp) {
@@ -819,8 +821,9 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     val importedNames: List[Name] = 
       selectorRenames filterNot (_ == USCOREkw) flatMap (x => List(x.toTypeName, x.toTermName))
     
-    override def resultExtractionCode(req: Request, code: PrintWriter) =
-      code println codegenln(imp.toString)
+    override def resultExtractionCodeSifj(req: Request, code: PrintWriter) =
+      code print (""".append("%s")""" + "\n").
+      format(string2code(imp.toString))
   }
 
   /** One line of code submitted by the user for interpretation */

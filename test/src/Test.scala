@@ -160,7 +160,7 @@ object Test {
         Nil) :::
       //
       // test for ImportHandler
-      testInterpreter("import java.util._", InterpreterResults.Error,
+      testInterpreter("import java.util._", InterpreterResults.Success,
         "import java.util._", None, None,
         Nil) :::
       //
