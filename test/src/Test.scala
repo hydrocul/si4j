@@ -125,13 +125,22 @@ object Test {
         "x: Int = 4",
         Some(("x", 4, "Int")), None,
         ("x", 4, "Int") :: Nil) :::
-      //
+      // test for re-assignment to val
       testInterpreter("val x = 5", InterpreterResults.Success,
         "x: Int = 5",
         Some(("x", 5, "Int")), None,
         ("x", 5, "Int") :: Nil) :::
       testInterpreter("x = 4", InterpreterResults.Error,
         "", None, None,
+        Nil) :::
+      //
+      // test for ModuleHandler
+      testInterpreter("object testObj", InterpreterResults.Success,
+        "defined module testObj", None, None,
+        Nil) :::
+      testInterpreter("object testObj { override def toString = \"testObj\" }",
+        InterpreterResults.Success,
+        "defined module testObj", None, None,
         Nil) :::
       //
       testInterpreter("var x = 5 % 3; var x = 3", InterpreterResults.Error,
