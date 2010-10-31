@@ -717,9 +717,9 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
       val codeToPrint = (
         """.append("%s: %s = " + %s, Some(scala.tools.nsc.ResultValueInfo("%s", %s, "%s")), """ +
         """scala.tools.nsc.ResultValueInfo("%s", %s, "%s") :: Nil) /* ValHandler */""" + "\n").
-        format(prettyName, string2code(req typeOf vname), resultString,
-        prettyName, extractor, string2code(req typeOf vname),
-        prettyName, extractor, string2code(req typeOf vname))
+        format(string2code(prettyName), string2code(req typeOf vname), resultString,
+        string2code(prettyName), extractor, string2code(req typeOf vname),
+        string2code(prettyName), extractor, string2code(req typeOf vname))
       
       code print codeToPrint
     }
@@ -736,7 +736,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     override def resultExtractionCodeSifj(req: Request, code: PrintWriter){
       if (mods.isPublic){
         code print (""".append("%s: %s") /* DefHandler */""" + "\n").
-        format(name, req.typeOf(name));
+        format(string2code(name), string2code(req.typeOf(name)));
       }
     }
   }
@@ -756,9 +756,9 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
       val codeToPrint = (
         """.append("%s: %s = " + %s, Some(scala.tools.nsc.ResultValueInfo("%s", %s, "%s")), """ +
         """scala.tools.nsc.ResultValueInfo("%s", %s, "%s") :: Nil) /* AssignHandler */""" + "\n").
-        format(lhs, lhsType, res,
-        lhs, res, lhsType,
-        lhs, res, lhsType)
+        format(string2code(lhs.toString), lhsType, res,
+        string2code(lhs.toString), res, lhsType,
+        string2code(lhs.toString), res, lhsType)
 
       code println codeToPrint
     }
@@ -770,7 +770,7 @@ class InterpreterSifj(_settings: Settings, out: PrintWriter) extends Interpreter
     override def generatesValue = Some(name)
 
     override def resultExtractionCodeSifj(req: Request, code: PrintWriter) =
-      code println (""".append("defined module %s")""" + "\n").format(name)
+      code println (""".append("defined module %s")""" + "\n").format(string2code(name))
   }
 
   private class ClassHandler(classdef: ClassDef) extends MemberHandler(classdef) {
